@@ -1,2 +1,4 @@
 *.txt
+
+# Ignore all executable files
 *.exe
