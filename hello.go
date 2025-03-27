@@ -1,33 +1,24 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"log"
+	"os"
 
-type Vehicle interface {
-	move()
-}
-type Car struct {
-	name string
-}
-type Ship struct {
-	name string
-}
-
-func (c Car) move() {
-	fmt.Println(c.name)
-}
-
-func (s Ship) move() {
-	fmt.Println(s.name)
-}
-
-func drive(v Vehicle) {
-	v.move()
-}
+	"github.com/joho/godotenv"
+)
 
 func main() {
-	car := Car{"Volvo"}
-	ship := Ship{"Admiral"}
+	// Load .env
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
-	drive(car)
-	drive(ship)
+	dbUser := os.Getenv("DB_USER")
+	dbName := os.Getenv("DB_NAME")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbSslMode := os.Getenv("DB_SSL_MODE")
+
+	fmt.Print(dbUser, dbName, dbPassword, dbSslMode)
 }
