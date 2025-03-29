@@ -2,14 +2,14 @@ package db
 
 import (
 	"database/sql"
-	"fmt"
+	"errors"
 )
 
 type Product struct {
-	id      int
-	model   string
-	company string
-	price   int
+	Id      int    `json:"id,omitempty"`
+	Model   string `json:"model"`
+	Company string `json:"company"`
+	Price   int    `json:"price"`
 }
 
 func GetProductById(db *sql.DB, id int) Product {
@@ -17,7 +17,7 @@ func GetProductById(db *sql.DB, id int) Product {
 
 	product := Product{}
 
-	err := row.Scan(&product.id, &product.model, &product.company, &product.price)
+	err := row.Scan(&product.Id, &product.Model, &product.Company, &product.Price)
 	if err != nil {
 		panic(err)
 	}
@@ -33,29 +33,31 @@ func GetProducts(db *sql.DB) []Product {
 
 	for rows.Next() {
 		product := Product{}
-		err := rows.Scan(&product.id, &product.model, &product.company, &product.price)
+		err := rows.Scan(&product.Id, &product.Model, &product.Company, &product.Price)
 		if err != nil {
 			panic(err)
 		}
 		products = append(products, product)
 	}
+
 	return products
 }
 
-func InsertProduct(db *sql.DB) int {
-	var id int
-	db.QueryRow("insert into products (model, company, price) values ($1,$2,$3) returning id", "Android", "Xiaomi", 1500).Scan(&id)
-	return id
+func InsertProduct(db *sql.DB, product *Product) {
+	db.QueryRow("insert into products (model, company, price) values ($1,$2,$3) returning id", product.Model, product.Company, product.Price).Scan(&product.Id)
 }
 
-func DeleteProductById(db *sql.DB, id int) {
+func DeleteProductById(db *sql.DB, id int) error {
 	result, err := db.Exec("delete from products where id = $1", id)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	count, err := result.RowsAffected()
 	if err != nil {
-		panic(err)
+		return err
 	}
-	fmt.Println("Count deleted products:", count)
+	if count == 0 {
+		return errors.New("Product id not found")
+	}
+	return nil
 }
