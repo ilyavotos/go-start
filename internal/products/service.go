@@ -1,4 +1,4 @@
-package db
+package products
 
 import (
 	"database/sql"
@@ -12,16 +12,16 @@ type Product struct {
 	Price   int    `json:"price"`
 }
 
-func GetProductById(db *sql.DB, id int) Product {
+func GetProductById(db *sql.DB, id int) (Product, error) {
 	row := db.QueryRow("select * from products where id = $1", id)
 
 	product := Product{}
 
 	err := row.Scan(&product.Id, &product.Model, &product.Company, &product.Price)
 	if err != nil {
-		panic(err)
+		return product, err
 	}
-	return product
+	return product, nil
 }
 
 func GetProducts(db *sql.DB) []Product {
