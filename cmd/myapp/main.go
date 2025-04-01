@@ -40,4 +40,5 @@ func main() {
 	// Server
 	addr := fmt.Sprintf("%s:%s", host, port)
 	http.ListenAndServe(addr, nil)
+
 }

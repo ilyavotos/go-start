@@ -9,9 +9,11 @@ import (
 )
 
 func Handler(w http.ResponseWriter, r *http.Request) {
+	productRepository := NewSQLProductRepository(db.Database)
+	productService := NewRepoProductService(productRepository)
 	switch r.Method {
 	case http.MethodGet:
-		products := GetProducts(db.Database)
+		products, _ := productService.GetAllProduct()
 
 		for index, product := range products {
 			fmt.Println(index, product)
@@ -34,7 +36,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		InsertProduct(db.Database, &product)
+		productService.CreateProduct(&product)
 
 		productsJson, err := json.Marshal(product)
 		if err != nil {
@@ -50,6 +52,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandlerId(w http.ResponseWriter, r *http.Request) {
+	productRepository := NewSQLProductRepository(db.Database)
+	productService := NewRepoProductService(productRepository)
+
 	id := r.PathValue("id")
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
@@ -58,7 +63,7 @@ func HandlerId(w http.ResponseWriter, r *http.Request) {
 	}
 	switch r.Method {
 	case http.MethodGet:
-		product, err := GetProductById(db.Database, idInt)
+		product, err := productService.GetProduct(idInt)
 
 		if err != nil {
 			http.Error(w, "GetProductById error: "+err.Error(), http.StatusInternalServerError)
@@ -75,7 +80,7 @@ func HandlerId(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write(productJson)
 	case http.MethodDelete:
-		err = DeleteProductById(db.Database, idInt)
+		err = productService.DeleteProduct(idInt)
 		if err != nil {
 			fmt.Println("Delete product error: ", err)
 			http.Error(w, "Delete product error: "+err.Error(), http.StatusInternalServerError)
